@@ -1,9 +1,9 @@
 /**
  * RebotApp — ¿Va a dar la rebotá?
  *
- * La "Rebotá" es una caída brusca de la temperatura: que en las próximas 24 horas
- * alguna hora vaya a estar UMBRAL_C grados (6 por defecto) o más por debajo de la
- * misma hora del día anterior. Julio Gómez Medina fue el inventor de este concepto.
+ * La "rebotá" es una caída brusca de la temperatura: que en las próximas 24 horas
+ * alguna hora vaya a estar UMBRAL_C grados (8 por defecto) o más por debajo de la
+ * misma hora del día anterior.
  *
  * Cloudflare Worker (plan gratuito):
  *  - fetch():      la web (consulta + gestión de avisos)
@@ -396,9 +396,12 @@ function pagina(cuerpo, { status = 200, manifest = "/manifest.webmanifest" } = {
  details summary{cursor:pointer;color:var(--sub)}
  code{background:var(--bg);padding:2px 6px;border-radius:6px;word-break:break-all}
  small{color:var(--sub)}[hidden]{display:none!important}
+ .pie{color:var(--sub);font-size:.85rem;margin:24px 4px 0;line-height:1.45}
 </style></head><body><main>
 <a class="marca" href="/"><img src="/icon-192.png" alt="">RebotApp</a>
-${cuerpo}</main></body></html>`, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
+${cuerpo}
+<p class="pie">* El concepto «rebotá» fue acuñado originalmente por Julio Gómez Medina. Esta aplicación resucita el concepto para darle vigencia y utilidad.</p>
+</main></body></html>`, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
 }
 
 const textoHoras = (c) => c.horas.join(" y ");
@@ -416,8 +419,8 @@ const error404 = () => pagina('<div class="card"><h1>No encontrado</h1><p>Este a
 function inicio(c) {
   return pagina(`
 <div class="card">
- <h1>¿Va a dar la rebotá?</h1>
- <p class="sub">Dinos dónde estás y te decimos si en las próximas 24 horas la temperatura va a caer ${c.umbral} °C o más respecto al día anterior. Julio Gómez Medina fue el inventor del concepto "Rebotá".</p>
+ <h1>¿Va a dar la rebotá*?</h1>
+ <p class="sub">Dinos dónde estás y te decimos si en las próximas 24 horas la temperatura va a caer ${c.umbral} °C o más respecto al día anterior.</p>
  <form method="post" action="/buscar">
   <input type="text" name="q" placeholder="Tu localidad (p. ej. Las Rozas)" required>
   <button>Buscar</button>
