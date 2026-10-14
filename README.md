@@ -4,57 +4,62 @@ La **rebotá** es una caída brusca de la temperatura: que en las próximas 24 h
 
 RebotApp es una web que cualquiera puede usar desde un enlace: indica su localidad (o usa la ubicación del móvil), ve al momento si va a dar la rebotá y, si quiere, activa un aviso para recibir una notificación en el móvil cada vez que vaya a dar.
 
+Funciona gratis en **Cloudflare Workers**:
+
 - Pronóstico: [Open-Meteo](https://open-meteo.com) (gratuito, sin clave).
-- Notificaciones: [ntfy](https://ntfy.sh) (app gratuita para Android e iPhone, sin registro).
-- Revisión automática a las 8:00 y a las 20:00 (hora de Madrid).
+- Avisos: [ntfy](https://ntfy.sh) (app gratuita para Android e iPhone, sin registro).
+- Revisión automática a las 8:00 y a las 20:00, hora de Madrid (respeta el cambio de hora).
+- Suscripciones guardadas en el almacenamiento SQLite integrado del Worker. No hay que crear ninguna base de datos.
 
 ## Cómo decide si va a dar la rebotá
 
 Para cada hora de las próximas 24 h compara la temperatura prevista con la de **la misma hora del día anterior**. Así no salta por el enfriamiento normal de la noche (en Madrid es habitual bajar 12–15 °C de la tarde a la madrugada) y sí salta con frentes fríos, DANAs o entradas de aire polar. Tras un aviso, no repite durante 18 h.
 
-## Probarlo en tu ordenador
+## Archivos
 
-```bash
-pip install -r requirements.txt
-python app.py
-```
+| Archivo | Para qué sirve |
+|---|---|
+| `index.js` | La app: web, cálculo de la rebotá y avisos |
+| `wrangler.toml` | Configuración para Cloudflare (nombre, horario, almacenamiento) |
+| `package.json` | Indica a Cloudflare qué herramienta usar para publicarla |
+| `README.md` | Estas instrucciones |
 
-Abre http://localhost:5000, consulta tu localidad, pulsa *Avísame* y luego "Enviar notificación de prueba".
-Para forzar una revisión inmediata de todos los suscriptores: `python app.py revisar`.
+## Publicarla en Cloudflare (gratis, sin tarjeta)
 
-## Publicarlo para compartir el enlace
+1. **GitHub**: en el repositorio RebotApp, borra los archivos de la versión anterior (`app.py`, `requirements.txt`, `render.yaml`) y sube estos cuatro a la raíz.
+2. **Cuenta**: regístrate en dash.cloudflare.com con correo y contraseña (plan Free).
+3. En el menú de la izquierda entra en **Workers & Pages** (en algunos paneles aparece dentro de *Compute*) → **Create application**.
+4. Junto a **Import a repository** pulsa **Get started**, conecta tu cuenta de **GitHub** (puedes darle acceso solo a RebotApp) y elige el repositorio.
+5. En la configuración, el nombre del proyecto debe ser exactamente **`rebotapp`** (igual que en `wrangler.toml`; si no coincide, falla). El resto de opciones déjalas como vienen; si te pide un comando de despliegue, pon `npx wrangler deploy`.
+6. Pulsa **Save and Deploy**. En uno o dos minutos tendrás la dirección `https://rebotapp.<tu-subdominio>.workers.dev`. Ese es el enlace para compartir.
+7. Entra, consulta tu localidad, pulsa **Avísame** y luego **Enviar notificación de prueba**.
 
-### En Render (recomendado)
+A partir de ahí, cada cambio que hagas en GitHub se publica solo.
 
-La carpeta incluye `render.yaml`, que deja todo configurado: servidor en Frankfurt, disco de 1 GB para guardar las suscripciones y revisión a las 8:00 y 20:00.
+## Cambiar ajustes
 
-1. **GitHub**: crea un repositorio nuevo (puede ser privado) en github.com → *New repository* → *uploading an existing file*, y arrastra los cuatro archivos: `app.py`, `requirements.txt`, `render.yaml` y `README.md`.
-2. **Render**: crea una cuenta en render.com (puedes entrar con GitHub) y añade un método de pago.
-3. Pulsa **New → Blueprint**, conecta tu cuenta de GitHub, elige el repositorio y pulsa **Apply**. Render lee `render.yaml` y lo monta solo; tarda unos minutos.
-4. Cuando aparezca *Live*, tendrás una dirección del tipo `https://rebotapp-xxxx.onrender.com`. Ese es el enlace que compartes.
-5. Entra tú primero, consulta tu localidad, pulsa *Avísame* y luego *Enviar notificación de prueba* para comprobar que llega al móvil.
-
-Coste: el plan de pago más pequeño de Render más el disco; consulta render.com/pricing. El plan gratuito no sirve: se duerme cuando nadie visita la web (y entonces no revisa a las 8:00) y no admite disco (las suscripciones se perderían).
-
-Para cambiar el umbral o las horas más adelante: en Render, *Environment* → edita `UMBRAL_C` o `HORAS_REVISION` → guarda (se reinicia solo).
-
-### En un VPS o PythonAnywhere
-
-Sirve la web con `ACTIVAR_PROGRAMADOR=0 gunicorn -w 1 -b 0.0.0.0:8000 app:app` y programa la revisión con cron:
-`0 8,20 * * * cd /ruta/rebotapp && python app.py revisar`
-
-## Configuración (variables de entorno)
+En `wrangler.toml`, sección `[vars]`:
 
 | Variable | Por defecto | Qué hace |
 |---|---|---|
-| `UMBRAL_C` | `8` | Grados de caída que disparan el aviso |
-| `HORAS_REVISION` | `8,20` | Horas de revisión |
-| `ZONA_PROGRAMADOR` | `Europe/Madrid` | Zona horaria de esas horas |
+| `UMBRAL_C` | `8` | Grados de caída para que dé la rebotá |
+| `HORAS_REVISION` | `8,20` | Horas locales de revisión |
+| `ZONA` | `Europe/Madrid` | Zona horaria de esas horas |
 | `HORAS_ENTRE_AVISOS` | `18` | Silencio tras un aviso |
-| `DB_PATH` | `alertas.db` | Base de datos SQLite |
-| `NTFY_SERVER` | `https://ntfy.sh` | Servidor ntfy (puedes usar uno propio) |
-| `ACTIVAR_PROGRAMADOR` | `1` | `0` si la revisión la hace cron |
+| `NTFY_SERVER` | `https://ntfy.sh` | Servidor de notificaciones |
+
+## Límites del plan gratuito
+
+100.000 visitas al día y 50 consultas externas por revisión. Los pronósticos se piden en lotes de 50 ubicaciones y, si un día tocara avisar a muchísima gente a la vez, los pendientes se avisan media hora después. De sobra para uso personal, familia y amigos, e incluso varios cientos de suscriptores.
 
 ## Privacidad
 
-Cada suscriptor recibe un canal ntfy aleatorio difícil de adivinar, pero los canales de ntfy.sh son públicos para quien conozca su nombre: los avisos no contienen datos personales, solo la localidad y la temperatura. Para más control, se puede apuntar `NTFY_SERVER` a un servidor ntfy propio.
+Cada suscriptor recibe un canal ntfy aleatorio difícil de adivinar, pero los canales de ntfy.sh son públicos para quien conozca su nombre: los avisos no contienen datos personales, solo la localidad y la temperatura.
+
+## Probar en local (opcional, para programadores)
+
+```bash
+npm install
+npx wrangler dev --test-scheduled
+# revisión forzada: curl "http://localhost:8787/__scheduled?cron=0+*+*+*+*" (con --var REVISAR_SIEMPRE:1)
+```
