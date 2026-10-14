@@ -3,7 +3,7 @@
  *
  * La "Rebotá" es una caída brusca de la temperatura: que en las próximas 24 horas
  * alguna hora vaya a estar UMBRAL_C grados (6 por defecto) o más por debajo de la
- * misma hora del día anterior. Julio Gómez Medina fue el inventor del concepto.
+ * misma hora del día anterior. Julio Gómez Medina fue el inventor de este concepto.
  *
  * Cloudflare Worker (plan gratuito):
  *  - fetch():      la web (consulta + gestión de avisos)
