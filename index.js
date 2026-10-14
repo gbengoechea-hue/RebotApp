@@ -417,7 +417,7 @@ function inicio(c) {
   return pagina(`
 <div class="card">
  <h1>¿Va a dar la rebotá?</h1>
- <p class="sub">Dinos dónde estás y te decimos si en las próximas 24 horas la temperatura va a caer ${c.umbral} °C o más respecto al día anterior.</p>
+ <p class="sub">Dinos dónde estás y te decimos si en las próximas 24 horas la temperatura va a caer ${c.umbral} °C o más respecto al día anterior. Julio Gómez Medina fue el inventor del concepto "Rebotá".</p>
  <form method="post" action="/buscar">
   <input type="text" name="q" placeholder="Tu localidad (p. ej. Las Rozas)" required>
   <button>Buscar</button>
