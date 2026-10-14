@@ -2,7 +2,7 @@
  * RebotApp — ¿Va a dar la rebotá?
  *
  * La "rebotá" es una caída brusca de la temperatura: que en las próximas 24 horas
- * alguna hora vaya a estar UMBRAL_C grados (8 por defecto) o más por debajo de la
+ * alguna hora vaya a estar UMBRAL_C grados (6 por defecto) o más por debajo de la
  * misma hora del día anterior.
  *
  * Cloudflare Worker (plan gratuito):
