@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: rebotapp
+    runtime: python
+    region: frankfurt
+    # Sin "plan": Render usa su plan de pago más pequeño por defecto.
+    # El plan gratuito no sirve: se duerme sin tráfico y no admite disco.
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 1 --threads 4 -b 0.0.0.0:$PORT app:app
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: DB_PATH
+        value: /var/data/alertas.db
+      - key: ACTIVAR_PROGRAMADOR
+        value: "1"
+      - key: UMBRAL_C
+        value: "8"
+      - key: HORAS_REVISION
+        value: "8,20"
+      - key: ZONA_PROGRAMADOR
+        value: Europe/Madrid
+    disk:
+      name: datos
+      mountPath: /var/data
+      sizeGB: 1
