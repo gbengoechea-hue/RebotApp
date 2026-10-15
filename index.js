@@ -400,7 +400,7 @@ function pagina(cuerpo, { status = 200, manifest = "/manifest.webmanifest" } = {
 </style></head><body><main>
 <a class="marca" href="/"><img src="/icon-192.png" alt="">RebotApp</a>
 ${cuerpo}
-<p class="pie">* El concepto «rebotá» fue acuñado originalmente por Julio Gómez Medina. Esta aplicación resucita su idea para darle vigencia y utilidad.</p>
+<p class="pie">* El concepto «rebotá» fue acuñado originalmente por Julio Gómez Medina. Esta aplicación recupera su idea para darle vigencia y utilidad.</p>
 </main></body></html>`, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
 }
 
